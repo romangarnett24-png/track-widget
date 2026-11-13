@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Трекер CSE / Major",
+  "version": "1.1.0",
+  "description": "Мини-виджет для отслеживания посылок CSE и Major Express с историей и статусами.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "permissions": ["storage", "tabs", "scripting"],
+  "host_permissions": [
+    "https://www.cse.ru/*",
+    "https://www.major-express.ru/*"
+  ]
+}

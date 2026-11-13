@@ -1,0 +1,943 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Трекер CSE / Major</title>
+  <style>
+    :root {
+      --bg-app: #f8fafc;
+      --bg-card: #ffffff;
+      --bg-input: #f1f5f9;
+      --border-subtle: #e2e8f0;
+      --border-focus: #2563eb;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --text-subtle: #94a3b8;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success-bg: #ecfdf5;
+      --success-text: #059669;
+      --success-border: #a7f3d0;
+      --pending-bg: #f1f5f9;
+      --pending-text: #475569;
+      --pending-border: #cbd5e1;
+      --error-bg: #fef2f2;
+      --error-text: #dc2626;
+      --error-border: #fecaca;
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --radius-pill: 9999px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 380px;
+      min-height: 480px;
+      max-height: 600px;
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Inter", Helvetica, Arial, sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      user-select: none;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    header {
+      background: var(--bg-card);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .brand-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: var(--radius-sm);
+      background: var(--primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 600;
+      background: var(--primary-light);
+      color: var(--primary);
+      padding: 1px 5px;
+      border-radius: 4px;
+    }
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+      background: var(--bg-card);
+      padding: 6px 12px 8px;
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .tab-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover {
+      background: var(--bg-input);
+      color: var(--text-main);
+    }
+    .tab-btn.active {
+      background: var(--primary-light);
+      color: var(--primary);
+      border-color: rgba(37, 99, 235, 0.2);
+    }
+    .tab-counter {
+      background: #e2e8f0;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: var(--radius-pill);
+    }
+    .tab-btn.active .tab-counter {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    main::-webkit-scrollbar { width: 5px; }
+    main::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    main::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+
+    /* Carrier Selector */
+    .label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .carrier-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .carrier-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 10px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-app);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: all 0.15s ease;
+    }
+    .carrier-btn:hover {
+      border-color: #cbd5e1;
+      background: #f1f5f9;
+    }
+    .carrier-btn.active {
+      background: #fff;
+      border-color: var(--primary);
+      color: var(--primary);
+      box-shadow: 0 0 0 1px var(--primary);
+    }
+    .dot-cse { width: 8px; height: 8px; border-radius: 50%; background: #dc2626; }
+    .dot-major { width: 8px; height: 8px; border-radius: 50%; background: #2563eb; }
+
+    /* Input with actions */
+    .input-wrapper {
+      position: relative;
+      margin-bottom: 10px;
+    }
+    .track-input {
+      width: 100%;
+      height: 38px;
+      padding: 8px 64px 8px 10px;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 13px;
+      color: var(--text-main);
+      outline: none;
+      transition: all 0.15s ease;
+    }
+    .track-input:focus {
+      border-color: var(--border-focus);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+    .input-actions {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .btn-icon-sm {
+      background: transparent;
+      border: none;
+      color: var(--text-subtle);
+      cursor: pointer;
+      padding: 3px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon-sm:hover { color: var(--text-main); background: #e2e8f0; }
+    .btn-paste {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--primary);
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 2px 5px;
+      cursor: pointer;
+    }
+    .btn-paste:hover { background: var(--primary-light); }
+
+    /* Button Row */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-primary {
+      flex: 1;
+      height: 36px;
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-secondary {
+      height: 36px;
+      padding: 0 12px;
+      background: var(--bg-input);
+      color: var(--text-muted);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover { background: #e2e8f0; color: var(--text-main); }
+
+    /* Status Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      width: fit-content;
+    }
+    .badge-pending {
+      background: #f1f5f9;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+    .badge-delivered {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-color: var(--success-border);
+    }
+    .dot-pending {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #64748b;
+    }
+    .dot-delivered {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+
+    /* Result Section */
+    .result-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .track-num-display {
+      font-family: ui-monospace, Consolas, monospace;
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .copy-btn:hover { color: var(--primary); background: var(--bg-input); }
+
+    /* As-Is Tracking Content Container with Expand/Collapse */
+    .tracking-content-box {
+      background: var(--bg-app);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 10px;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+    .tracking-text {
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text-main);
+      white-space: pre-wrap;
+      word-break: break-word;
+      transition: max-height 0.25s ease;
+    }
+    .tracking-text.collapsed {
+      max-height: 84px;
+      overflow: hidden;
+      position: relative;
+    }
+    .tracking-text.collapsed::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 36px;
+      background: linear-gradient(to bottom, rgba(248, 250, 252, 0), rgba(248, 250, 252, 1));
+      pointer-events: none;
+    }
+    .tracking-text.expanded {
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    /* Expand button */
+    .btn-expand {
+      width: 100%;
+      margin-top: 6px;
+      padding: 5px 8px;
+      background: #fff;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+    .btn-expand:hover {
+      background: var(--primary-light);
+      border-color: rgba(37, 99, 235, 0.3);
+    }
+
+    /* Manual Status Toggle Area */
+    .manual-status-box {
+      background: #f8fafc;
+      border: 1px dashed var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .btn-toggle-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+    .btn-mark-delivered {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border-color: var(--success-border);
+    }
+    .btn-mark-delivered:hover {
+      background: #d1fae5;
+    }
+    .btn-mark-pending {
+      background: #f1f5f9;
+      color: #475569;
+      border-color: #cbd5e1;
+    }
+    .btn-mark-pending:hover {
+      background: #e2e8f0;
+    }
+
+    /* Debug Box */
+    .debug-box {
+      background: #0f172a;
+      color: #94a3b8;
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 11px;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      white-space: pre-wrap;
+      max-height: 160px;
+      overflow-y: auto;
+      border: 1px solid #1e293b;
+      display: none;
+    }
+
+    .result-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding-top: 2px;
+    }
+    .carrier-link {
+      color: var(--primary);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .carrier-link:hover { text-decoration: underline; }
+
+    /* Alert Banner */
+    .alert-banner {
+      background: var(--error-bg);
+      border: 1px solid var(--error-border);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      color: var(--error-text);
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .alert-header {
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .alert-msg { font-size: 11px; color: #7f1d1d; }
+    .alert-btn {
+      align-self: flex-start;
+      background: #fff;
+      border: 1px solid var(--error-border);
+      color: var(--error-text);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .alert-btn:hover { background: #fee2e2; }
+
+    /* History View & Filter Subtabs */
+    .history-filter-bar {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .filter-btn {
+      flex: 1;
+      padding: 6px 8px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-card);
+      border-radius: var(--radius-sm);
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+    .filter-btn:hover { background: var(--bg-input); color: var(--text-main); }
+    .filter-btn.active {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .filter-badge {
+      background: #e2e8f0;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: var(--radius-pill);
+    }
+    .filter-btn.active .filter-badge {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .history-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .history-item:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06);
+    }
+    .history-item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .history-track-num {
+      font-family: ui-monospace, Consolas, monospace;
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--text-main);
+    }
+    .history-carrier-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .tag-cse { background: #fee2e2; color: #b91c1c; }
+    .tag-major { background: #dbeafe; color: #1d4ed8; }
+
+    .history-item-snippet {
+      font-size: 11px;
+      color: var(--text-main);
+      line-height: 1.35;
+      max-height: 50px;
+      overflow: hidden;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .history-item-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 6px;
+      margin-top: 2px;
+    }
+    .history-time { font-size: 10px; color: var(--text-subtle); }
+    .history-actions { display: flex; align-items: center; gap: 4px; }
+    
+    .history-action-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    .history-action-btn:hover { background: var(--bg-input); color: var(--text-main); }
+    .history-action-btn.btn-del:hover { color: var(--error-text); background: var(--error-bg); }
+
+    .btn-card-toggle {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .btn-card-toggle.mark-del {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid var(--success-border);
+    }
+    .btn-card-toggle.mark-del:hover { background: #d1fae5; }
+    .btn-card-toggle.unarchive {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+    }
+    .btn-card-toggle.unarchive:hover { background: #e2e8f0; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 36px 16px;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    .empty-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: var(--bg-input);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-subtle);
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%) translateY(50px);
+      background: #0f172a;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      opacity: 0;
+      transition: all 0.25s ease;
+      pointer-events: none;
+      z-index: 100;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <span>Трекер CSE / Major</span>
+        <span class="brand-badge">v1.3</span>
+      </div>
+    </div>
+    <div class="status-indicator">
+      <span class="status-dot"></span>
+      <span>Готов</span>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-nav">
+    <button id="nav-search" class="tab-btn active">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <span>Поиск</span>
+    </button>
+    <button id="nav-history" class="tab-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="21 8 21 21 3 21 3 8"></polyline>
+        <rect x="1" y="3" width="22" height="5"></rect>
+        <line x1="10" y1="12" x2="14" y2="12"></line>
+      </svg>
+      <span>Мои посылки</span>
+      <span id="history-count" class="tab-counter">0</span>
+    </button>
+  </div>
+
+  <main>
+    <!-- View: Search -->
+    <div id="view-search">
+      <div class="card" style="margin-bottom: 10px;">
+        <span class="label">Служба доставки</span>
+        <div class="carrier-grid">
+          <button id="btn-carrier-cse" class="carrier-btn active" data-carrier="cse">
+            <span class="dot-cse"></span>
+            <span>CSE Express</span>
+          </button>
+          <button id="btn-carrier-major" class="carrier-btn" data-carrier="major">
+            <span class="dot-major"></span>
+            <span>Major Express</span>
+          </button>
+        </div>
+
+        <span class="label">Трек-номер</span>
+        <div class="input-wrapper">
+          <input id="num" class="track-input" type="text" placeholder="Введите номер накладной..." autocomplete="off" spellcheck="false">
+          <div class="input-actions">
+            <button id="btn-clear" class="btn-icon-sm" title="Очистить" style="display:none;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+            <button id="btn-paste" class="btn-paste" title="Вставить из буфера">Вставить</button>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="go" class="btn-primary">
+            <svg id="icon-search" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <span id="go-text">Найти</span>
+          </button>
+          <button id="dbg" class="btn-secondary" title="Показать или скрыть отладочный вывод">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v2c0 2.2 1.8 4 4 4v2a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-2c2.2 0 4-1.8 4-4v-2a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"></path>
+              <line x1="4" y1="13" x2="20" y2="13"></line>
+            </svg>
+            <span>Отладка</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Error / Timeout Alert Banner -->
+      <div id="alert-banner" class="alert-banner">
+        <div class="alert-header">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+          <span id="alert-title">Ошибка при запросе</span>
+        </div>
+        <div id="alert-msg" class="alert-msg">Сайт перевозчика не ответил вовремя.</div>
+        <button id="alert-retry-btn" class="alert-btn">Повторить попытку</button>
+      </div>
+
+      <!-- Result Section -->
+      <div id="result-card" class="card result-section" style="display:none;">
+        <div class="result-header">
+          <div class="track-num-display">
+            <span id="res-carrier-tag" class="history-carrier-tag tag-cse">CSE</span>
+            <span id="res-track-num">-</span>
+            <button id="res-copy-btn" class="copy-btn" title="Скопировать номер">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            </button>
+          </div>
+          <!-- Status Badge (User determined) -->
+          <div id="res-user-badge" class="status-badge badge-pending">
+            <span id="res-user-dot" class="dot-pending"></span>
+            <span id="res-user-status-text">Не выдано</span>
+          </div>
+        </div>
+
+        <!-- As-Is Tracking Content Container with Expand/Collapse -->
+        <div class="tracking-content-box">
+          <div id="res-tracking-text" class="tracking-text collapsed">Здесь появится статус посылки...</div>
+          <button id="btn-toggle-expand" class="btn-expand">
+            <span id="btn-toggle-expand-text">Развернуть всю историю ▼</span>
+          </button>
+        </div>
+
+        <!-- Manual status toggle -->
+        <div class="manual-status-box">
+          <div>
+            <span style="font-size:11px; font-weight:600; color:var(--text-muted); display:block;">Статус посылки:</span>
+            <span id="res-status-hint" style="font-size:11px; color:var(--text-main);">По умолчанию — не выдано</span>
+          </div>
+          <button id="res-btn-toggle" class="btn-toggle-status btn-mark-delivered">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span id="res-btn-toggle-text">Отметить как выдано</span>
+          </button>
+        </div>
+
+        <!-- Debug Info Box -->
+        <div id="debug-box" class="debug-box"></div>
+
+        <div class="result-footer">
+          <span id="res-update-time">Проверено: только что</span>
+          <a id="res-carrier-link" class="carrier-link" href="#" target="_blank">
+            <span>Открыть на сайте</span>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- View: History (Мои посылки с вкладками Активные / Архив) -->
+    <div id="view-history" style="display:none;">
+      <!-- Subtabs filter: Активные vs Архив -->
+      <div class="history-filter-bar">
+        <button id="btn-filter-active" class="filter-btn active">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>Активные (Не выдано)</span>
+          <span id="count-active" class="filter-badge">0</span>
+        </button>
+        <button id="btn-filter-archive" class="filter-btn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+          <span>Архив (Выдано)</span>
+          <span id="count-archive" class="filter-badge">0</span>
+        </button>
+      </div>
+
+      <!-- Action bar for history -->
+      <div style="display:flex; justify-content:flex-end; margin-bottom:6px;">
+        <button id="btn-clear-history" style="background:none; border:none; color:var(--text-muted); font-size:11px; cursor:pointer; text-decoration:underline;">Очистить текущий список</button>
+      </div>
+
+      <!-- List Container -->
+      <div id="history-list" class="history-list"></div>
+
+      <!-- Empty state: Active -->
+      <div id="history-empty-active" class="empty-state" style="display:none;">
+        <div class="empty-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <polyline points="21 8 21 21 3 21 3 8"></polyline>
+            <rect x="1" y="3" width="22" height="5"></rect>
+            <line x1="10" y1="12" x2="14" y2="12"></line>
+          </svg>
+        </div>
+        <p style="font-weight:600; font-size:13px; color:var(--text-main);">Нет активных посылок</p>
+        <p style="font-size:11px;">Все отправления доставлены или ещё не добавлены через «Поиск».</p>
+      </div>
+
+      <!-- Empty state: Archive -->
+      <div id="history-empty-archive" class="empty-state" style="display:none;">
+        <div class="empty-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <p style="font-weight:600; font-size:13px; color:var(--text-main);">Архив пуст</p>
+        <p style="font-size:11px;">Здесь появятся посылки, которые вы отметите как «Выдано».</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast notification -->
+  <div id="toast">Номер скопирован</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
